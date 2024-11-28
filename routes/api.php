@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\Emailcontroller;
 use App\Http\Controllers\PostsController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\Admin\AuthController;
+use App\Http\Controllers\Api\User\AuthUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +41,32 @@ Route::group(['middleware' => ['api', 'check.lang'], 'namespace' => 'Api'], func
     Route::post('/new-product', [PostsController::class, 'createNewProduct']);
 
 
+    Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
 
+
+        Route::post('/login', [AuthController::class, 'loginAdmin']);
+        Route::post('/logout', [AuthController::class, 'logoutAdmin'])->middleware('auth.guard:admin-api');
+
+    });
+
+
+    Route::group(['prefix' => 'user', 'namespace' => 'User'], function() {
+
+
+        Route::post('/login-user', [AuthUserController::class, 'loginUser']);
+
+    });
+
+
+    Route::group(['prefix' => 'user', 'middleware' => 'auth.guard:user-api'], function() {
+
+
+        Route::post('/profile', function() {
+
+            return "only authed users are allowed";
+        });
+
+    });
 
    
 
@@ -47,7 +74,8 @@ Route::group(['middleware' => ['api', 'check.lang'], 'namespace' => 'Api'], func
 
 Route::group(['middleware' => ['api', 'check.lang', 'check.admin.token:admin-api'], 'namespace' => 'Api'], function() {
 
-    
+    Route::get('/get-cats', [CategoriesController::class, 'getCats']);
+
 });
 
 
